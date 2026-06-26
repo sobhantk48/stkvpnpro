@@ -1,21 +1,15 @@
-import 'subscription.dart';
+import 'subscription_downloader.dart';
 
 class SubscriptionManager {
 
-  static Subscription? current;
-
-  static Future<void> set(
+  static Future<List<String>>
+      update(
     String url,
   ) async {
 
-    current = Subscription(
-      url: url,
-      updatedAt: DateTime.now(),
-    );
-  }
-
-  static Future<void> refresh()
-  async {
-    // TODO
+    return await
+        SubscriptionDownloader
+            .download(
+                url);
   }
 }
