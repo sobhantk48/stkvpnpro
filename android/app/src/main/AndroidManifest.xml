@@ -6,8 +6,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
-        android:label="V2RAY STK"
         android:name="${applicationName}"
+        android:label="V2RAY STK"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
 
@@ -17,7 +17,29 @@
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
             android:hardwareAccelerated="true"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustResize">
+
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme"/>
+
+        </activity>
+
+        <service
+            android:name=".StkVpnService"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:exported="false">
+
+            <intent-filter>
+                <action
+                    android:name="android.net.VpnService"/>
+            </intent-filter>
+
+        </service>
+
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2"/>
 
     </application>
 
