@@ -29,28 +29,57 @@ class MainActivity : FlutterActivity() {
 
             when (call.method) {
 
-                "ping" ->
+                "ping" -> {
+
                     result.success(
                         "android_ok"
                     )
+                }
 
-                "startVpn" ->
+                "startVpn" -> {
+
                     result.success(
                         "vpn_start_ready"
                     )
+                }
 
-                "stopVpn" ->
+                "stopVpn" -> {
+
                     result.success(
                         "vpn_stop_ready"
                     )
+                }
 
-                "runtimeInit" ->
+                "runtimeInit" -> {
+
                     result.success(
                         "runtime_ready"
                     )
+                }
 
-                else ->
+                "libboxInit" -> {
+
+                    val ok =
+                        LibboxRuntime
+                            .initialize()
+
+                    result.success(
+                        ok
+                    )
+                }
+
+                "libboxVersion" -> {
+
+                    result.success(
+                        LibboxRuntime
+                            .version()
+                    )
+                }
+
+                else -> {
+
                     result.notImplemented()
+                }
             }
         }
     }
