@@ -9,20 +9,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Flutter (FIXED)
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version: "3.29.0"
           cache: true
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Check directory
+        run: ls -la
 
-      - name: Analyze project
+      - name: Install dependencies
+        run: |
+          cd .
+          flutter pub get
+
+      - name: Analyze
         run: flutter analyze
 
       - name: Build APK
