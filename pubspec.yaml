@@ -1,0 +1,29 @@
+name: v2ray_stk
+description: V2RAY stk - VPN Client
+publish_to: 'none'
+<<<<<<< HEAD
+version: 1.0.36+1
+=======
+version: 1.0.34+1
+>>>>>>> production-architecture
+
+environment:
+  sdk: '>=3.7.2 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  shared_preferences: ^2.1.2
+<<<<<<< HEAD
+  flutter_v2ray_plus: ^1.0.0
+  flutter_local_notifications: ^17.2.4
+=======
+>>>>>>> production-architecture
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true

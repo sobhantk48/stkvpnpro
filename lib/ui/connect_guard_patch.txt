@@ -1,0 +1,16 @@
+
+bool _isConnecting = false;
+
+Future<void> safeConnect() async {
+  if (_isConnecting) return;
+  if (activeConfig == null) return;
+
+  _isConnecting = true;
+
+  try {
+    await _connect();
+  } finally {
+    _isConnecting = false;
+  }
+}
+

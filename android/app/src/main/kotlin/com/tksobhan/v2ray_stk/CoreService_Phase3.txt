@@ -1,0 +1,29 @@
+
+- همیشه قبل start:
+  destroyForcibly + waitFor kill
+
+- بعد exec:
+  redirectOutputStreams(true)
+
+- اضافه شود:
+
+private fun killZombieProcess() {
+    try {
+        currentProcess?.destroy()
+        currentProcess?.destroyForcibly()
+        currentProcess = null
+    } catch (_: Exception) {}
+}
+
+private fun safeStart(cmd: Array<String>) {
+    killZombieProcess()
+    currentProcess = Runtime.getRuntime().exec(cmd)
+
+    Thread {
+        try {
+            currentProcess?.waitFor()
+            Log.e("CORE", "Process exited → auto recovery needed")
+        } catch (_: Exception) {}
+    }.start()
+}
+

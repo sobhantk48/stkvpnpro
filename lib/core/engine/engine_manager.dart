@@ -14,15 +14,15 @@ class EngineManager {
   }
 
   static Future<String> start(String configPath) async {
-    return _engine?.start(configPath) ?? "No Engine Selected";
+    return _engine?.start(configPath) ?? "No Engine";
   }
 
   static Future<String> stop() async {
-    return _engine?.stop() ?? "No Engine Selected";
+    return _engine?.stop() ?? "No Engine";
   }
 
   static Future<String> restart(String configPath) async {
-    return _engine?.restart(configPath) ?? "No Engine Selected";
+    return _engine?.restart(configPath) ?? "No Engine";
   }
 
   static bool isRunning() {

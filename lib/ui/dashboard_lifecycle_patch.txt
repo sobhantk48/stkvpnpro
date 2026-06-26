@@ -1,0 +1,12 @@
+
+@override
+void dispose() {
+  _stopAutoReconnect();
+  CoreController.dispose();
+
+  _linkController.dispose();
+  _subController.dispose();
+
+  super.dispose();
+}
+

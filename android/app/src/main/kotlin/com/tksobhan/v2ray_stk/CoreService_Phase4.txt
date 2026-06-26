@@ -1,0 +1,16 @@
+
+REPLACE startSingBox / startXray WITH:
+
+EngineManager.use(type)
+EngineManager.start(configPath)
+
+STOP:
+
+EngineManager.stop()
+
+ADD:
+
+- auto restart if process dies
+- validate config before start
+- reject invalid config
+

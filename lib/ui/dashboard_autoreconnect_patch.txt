@@ -1,0 +1,18 @@
+
+Timer? _reconnectTimer;
+
+void _startAutoReconnect() {
+  _reconnectTimer?.cancel();
+
+  _reconnectTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+    if (status != "CONNECTED" && activeConfig != null && !_isLoading) {
+      _connect();
+    }
+  });
+}
+
+void _stopAutoReconnect() {
+  _reconnectTimer?.cancel();
+  _reconnectTimer = null;
+}
+
