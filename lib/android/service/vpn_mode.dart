@@ -1,0 +1,4 @@
+enum VpnMode {
+  vpn,
+  proxy,
+}
