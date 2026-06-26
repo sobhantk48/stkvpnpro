@@ -4,7 +4,7 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
-class MainActivity: FlutterActivity() {
+class MainActivity : FlutterActivity() {
 
     private val CHANNEL =
         "stk_vpn/native"
@@ -13,10 +13,9 @@ class MainActivity: FlutterActivity() {
         flutterEngine: FlutterEngine
     ) {
 
-        super
-            .configureFlutterEngine(
-                flutterEngine
-            )
+        super.configureFlutterEngine(
+            flutterEngine
+        )
 
         MethodChannel(
             flutterEngine
@@ -28,17 +27,31 @@ class MainActivity: FlutterActivity() {
             call,
             result ->
 
-            when (
-                call.method
-            ) {
+            when (call.method) {
 
                 "ping" -> {
+
                     result.success(
                         "android_ok"
                     )
                 }
 
+                "startVpn" -> {
+
+                    result.success(
+                        "vpn_start_ready"
+                    )
+                }
+
+                "stopVpn" -> {
+
+                    result.success(
+                        "vpn_stop_ready"
+                    )
+                }
+
                 else -> {
+
                     result.notImplemented()
                 }
             }
