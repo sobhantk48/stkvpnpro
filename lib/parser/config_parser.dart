@@ -1,35 +1,28 @@
-import 'protocol_type.dart';
+import 'config_model.dart';
+import 'shadowsocks_parser.dart';
+import 'trojan_parser.dart';
+import 'vless_parser.dart';
 
 class ConfigParser {
 
-  static ProtocolType detect(
+  static ConfigModel?
+      parse(
     String config,
   ) {
 
-    if (config.startsWith(
-      "vless://",
-    )) {
-      return ProtocolType.vless;
-    }
+    return
 
-    if (config.startsWith(
-      "trojan://",
-    )) {
-      return ProtocolType.trojan;
-    }
+        VlessParser
+            .parse(config)
 
-    if (config.startsWith(
-      "ss://",
-    )) {
-      return ProtocolType.shadowsocks;
-    }
+        ??
 
-    if (config.startsWith(
-      "wireguard://",
-    )) {
-      return ProtocolType.wireguard;
-    }
+        TrojanParser
+            .parse(config)
 
-    return ProtocolType.unknown;
+        ??
+
+        ShadowsocksParser
+            .parse(config);
   }
 }
