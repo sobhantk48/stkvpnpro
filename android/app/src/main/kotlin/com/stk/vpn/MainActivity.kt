@@ -50,6 +50,13 @@ class MainActivity : FlutterActivity() {
                     )
                 }
 
+                "runtimeInit" -> {
+
+                    result.success(
+                        "runtime_ready"
+                    )
+                }
+
                 else -> {
 
                     result.notImplemented()
