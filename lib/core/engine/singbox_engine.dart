@@ -1,26 +1,27 @@
 import 'core_engine.dart';
 
-class SingBoxEngine implements CoreEngine {
-  bool _running = false;
+class SingboxEngine
+    implements CoreEngine {
 
   @override
-  Future<String> start(String configPath) async {
-    _running = true;
-    return "singbox started with $configPath";
+  Future<String> start(
+    String config,
+  ) async {
+
+    return "sing-box started";
   }
 
   @override
-  Future<String> stop() async {
-    _running = false;
-    return "singbox stopped";
+  Future<String> stop()
+  async {
+
+    return "sing-box stopped";
   }
 
   @override
-  Future<String> restart(String configPath) async {
-    await stop();
-    return await start(configPath);
-  }
+  Future<bool> health()
+  async {
 
-  @override
-  bool isRunning() => _running;
+    return true;
+  }
 }

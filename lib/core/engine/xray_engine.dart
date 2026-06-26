@@ -1,26 +1,27 @@
 import 'core_engine.dart';
 
-class XrayEngine implements CoreEngine {
-  bool _running = false;
+class XrayEngine
+    implements CoreEngine {
 
   @override
-  Future<String> start(String configPath) async {
-    _running = true;
-    return "xray started with $configPath";
+  Future<String> start(
+    String config,
+  ) async {
+
+    return "xray started";
   }
 
   @override
-  Future<String> stop() async {
-    _running = false;
+  Future<String> stop()
+  async {
+
     return "xray stopped";
   }
 
   @override
-  Future<String> restart(String configPath) async {
-    await stop();
-    return await start(configPath);
-  }
+  Future<bool> health()
+  async {
 
-  @override
-  bool isRunning() => _running;
+    return true;
+  }
 }
