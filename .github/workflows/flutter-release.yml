@@ -12,6 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ✔ ONLY VERSION MODE (no channel)
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
