@@ -1,8 +1,8 @@
-name: Flutter Release Build
+name: Flutter Release (Production)
 
 on:
   push:
-    branches: [main]
+    branches: [main, recovery-phase-86]
 
 jobs:
   build:
@@ -12,22 +12,41 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 🟢 Flutter Setup
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          flutter-version: "3.22.3"
+          cache: true
 
+      # 🟢 Clean Gradle Cache (fix CI issues)
+      - name: Clean Gradle Cache
+        run: rm -rf ~/.gradle
+
+      # 🟢 Get dependencies
       - name: Pub Get
         run: flutter pub get
 
+      # 🟢 Build Release APK
       - name: Build APK
-        run: flutter build apk --release --no-tree-shake-icons
+        run: flutter build apk --release
 
-      - name: List outputs (debug)
-        run: ls -R build/app/outputs/
+      # 🟢 Verify output
+      - name: Verify APK
+        run: find build -name "*.apk"
 
-      - name: Upload APK Artifact
+      # 🟢 Upload artifact (GitHub Actions download)
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/*.apk
+
+      # 🟢 Create GitHub Release (DIRECT DOWNLOAD APK)
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v1.0.${{ github.run_number }}
+          name: Release v1.0.${{ github.run_number }}
+          artifacts: build/app/outputs/flutter-apk/app-release.apk
+          token: ${{ secrets.GITHUB_TOKEN }}
