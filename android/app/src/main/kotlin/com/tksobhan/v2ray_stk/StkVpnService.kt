@@ -1,55 +1,25 @@
 package com.tksobhan.v2ray_stk
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
-import android.os.Build
+import android.content.Intent
 import android.net.VpnService
-import androidx.core.app.NotificationCompat
 
 class StkVpnService : VpnService() {
 
-    private val CHANNEL_ID = "stk_vpn_channel"
+    fun start(config: String, type: String) {
 
-    override fun onCreate() {
-        super.onCreate()
-        createNotificationChannel()
-        startForegroundService()
+        val intent = Intent(this, CoreService::class.java)
+
+        intent.putExtra("config", config)
+
+        intent.putExtra("type", type)
+
+        startService(intent)
     }
 
-    private fun startForegroundService() {
+    fun stop() {
 
-        val notification: Notification =
-            NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("STK VPN Running")
-                .setContentText("VPN is active and protected")
-                .setSmallIcon(android.R.drawable.ic_lock_lock)
-                .setOngoing(true)
-                .build()
+        val intent = Intent(this, CoreService::class.java)
 
-        startForeground(1, notification)
-    }
-
-    private fun createNotificationChannel() {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "STK VPN Service",
-                NotificationManager.IMPORTANCE_LOW
-            )
-
-            val manager =
-                getSystemService(Context.NOTIFICATION_SERVICE)
-                        as NotificationManager
-
-            manager.createNotificationChannel(channel)
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
+        stopService(intent)
     }
 }
