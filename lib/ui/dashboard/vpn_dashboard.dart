@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../controller/vpn_controller.dart';
 import '../status/vpn_status_controller.dart';
 import '../traffic/traffic_controller.dart';
 
@@ -34,9 +35,7 @@ class VpnDashboard extends StatelessWidget {
 
                 return Text(
                   "Status: $value",
-                  style: const TextStyle(
-                    fontSize: 20,
-                  ),
+                  style: const TextStyle(fontSize: 20),
                 );
               },
             ),
@@ -50,9 +49,7 @@ class VpnDashboard extends StatelessWidget {
 
               builder: (context, value, _) {
 
-                return Text(
-                  "Upload: $value KB/s",
-                );
+                return Text("Upload: $value KB/s");
               },
             ),
 
@@ -63,9 +60,7 @@ class VpnDashboard extends StatelessWidget {
 
               builder: (context, value, _) {
 
-                return Text(
-                  "Download: $value KB/s",
-                );
+                return Text("Download: $value KB/s");
               },
             ),
 
@@ -77,9 +72,9 @@ class VpnDashboard extends StatelessWidget {
 
                 ElevatedButton(
 
-                  onPressed: () {
+                  onPressed: () async {
 
-                    // Connect action placeholder
+                    await VpnController.connect();
                   },
 
                   child: const Text("Connect"),
@@ -89,9 +84,9 @@ class VpnDashboard extends StatelessWidget {
 
                 ElevatedButton(
 
-                  onPressed: () {
+                  onPressed: () async {
 
-                    // Disconnect action placeholder
+                    await VpnController.disconnect();
                   },
 
                   child: const Text("Disconnect"),
