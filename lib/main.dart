@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
 import 'package:v2ray_stk/services/preferences_service.dart';
 import 'package:v2ray_stk/services/vpn_service.dart';
 import 'package:v2ray_stk/services/config_service.dart';
 import 'package:v2ray_stk/services/notification_service.dart';
 import 'dart:convert';
 import 'dart:core';
-=======
 import 'package:v2ray_stk/ui/dashboard.dart';
->>>>>>> production-architecture
 
 void main() => runApp(const MyApp());
 
@@ -19,7 +16,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'V2RAY stk',
-<<<<<<< HEAD
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
@@ -66,7 +62,6 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
-// ========== صفحه خانه ==========
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -198,13 +193,10 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// ========== بقیه صفحات (تنظیمات، ادمین، مدیریت کانفیگ) ==========
 // (همان کدهای قبلی که بدون تغییر می‌مانند - برای جلوگیری از طولانی شدن، حذف شده‌اند)
 // اما برای کامل بودن، ادامه داده می‌شود ...
-=======
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const DashboardScreen(),
     );
   }
 }
->>>>>>> production-architecture
