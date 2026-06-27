@@ -2,8 +2,7 @@ name: Flutter Release Build
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   build:
@@ -13,27 +12,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Debug Repository
-        run: |
-          pwd
-          ls -la
-          find . -maxdepth 2 -type f | head -100
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
-          flutter-version: "3.29.0"
-          cache: true
-
-      - name: Flutter Doctor
-        run: flutter doctor -v
-
-      - name: Check pubspec
-        run: |
-          pwd
-          ls -la
-          cat pubspec.yaml
+          flutter-version: stable
 
       - name: Pub Get
         run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release --verbose
+
+      - name: Find APK (debug)
+        run: find . -name "*.apk"
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: "**/*.apk"
