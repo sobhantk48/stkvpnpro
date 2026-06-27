@@ -1,4 +1,3 @@
-import 'package:flutter_v2ray_plus/flutter_v2ray_plus.dart';
 import 'package:v2ray_stk/services/notification_service.dart';
 
 class VpnService {
