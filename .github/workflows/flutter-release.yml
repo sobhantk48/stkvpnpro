@@ -1,4 +1,4 @@
-name: Flutter Release (Production)
+name: Flutter Release (Production Stable)
 
 on:
   push:
@@ -12,31 +12,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 🚀 FIX: Flutter must match Dart >= 3.7
+      # 🔥 FIX 1: stable channel (no version conflict)
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.24.0"
+          channel: stable
           cache: true
 
+      # 🔥 FIX 2: clean environment
       - name: Clean Gradle Cache
         run: rm -rf ~/.gradle
 
       - name: Pub Get
         run: flutter pub get
 
+      # 🔥 FIX 3: build safe mode
       - name: Build APK
         run: flutter build apk --release
 
+      # 🔥 FIX 4: verify output
       - name: Verify APK
         run: find build -name "*.apk"
 
+      # 🔥 FIX 5: artifact
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
           path: build/app/outputs/flutter-apk/*.apk
 
+      # 🔥 FIX 6: GitHub Release
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
