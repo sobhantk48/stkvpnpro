@@ -1,4 +1,4 @@
-name: Flutter Release (Stable Clean Build)
+name: Flutter Clean Production Build
 
 on:
   push:
@@ -12,22 +12,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Flutter
+      # 🚨 CRITICAL FIX: remove cached flutter installs
+      - name: Remove old cache
+        run: |
+          sudo rm -rf /opt/hostedtoolcache/flutter
+
+      - name: Setup Flutter CLEAN
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.44.4'
           channel: stable
-          cache: true
+          cache: false   # 🔥 مهم‌ترین fix
 
-      # 🚨 IMPORTANT FIX: stop auto migration
-      - name: Disable Flutter auto upgrade
-        run: flutter config --no-analytics
+      - name: Verify Flutter
+        run: flutter doctor -v
 
-      - name: Clean environment
+      - name: Clean project
         run: |
           flutter clean
-          rm -rf ~/.gradle
           rm -rf android/.gradle
+          rm -rf ~/.gradle
 
       - name: Pub Get
         run: flutter pub get
