@@ -7,6 +7,8 @@ import android.os.*
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import java.io.File
+import java.lang.Process   // ← مهم‌ترین خط
+import java.lang.Runtime   // ← برای exec
 
 class CoreService : VpnService() {
 
