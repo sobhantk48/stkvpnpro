@@ -15,11 +15,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.22.0"
-          cache: true
-
-      - name: Flutter Doctor
-        run: flutter doctor -v
+          channel: stable
 
       - name: Pub Get
         run: flutter pub get
@@ -27,11 +23,11 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
 
-      - name: List APK Output
-        run: ls -R build/app/outputs/flutter-apk
+      - name: Show outputs
+        run: find build -name "*.apk"
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
+          name: release-apk
           path: build/app/outputs/flutter-apk/*.apk
