@@ -13,12 +13,12 @@ class AppRoot extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'V2Ray STK',
+      title: 'STK VPN Pro',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.light,
+          seedColor: Colors.indigo,
+          brightness: Brightness.dark,
         ),
       ),
       home: const DashboardScreen(),

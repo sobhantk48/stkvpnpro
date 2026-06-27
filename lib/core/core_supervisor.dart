@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:v2ray_stk/core/controller.dart';
+import 'controller.dart';
 
 class CoreSupervisor {
   static Timer? _healthTimer;
@@ -11,23 +11,23 @@ class CoreSupervisor {
     stopMonitor();
 
     _healthTimer = Timer.periodic(const Duration(seconds: 3), (timer) async {
-      final logs = CoreController.getLogs();
-
-      // اگر core dead شد → restart
-      if (!_isRunning) {
-        _isRunning = true;
-        return;
-      }
-
       try {
-        final res = await restartCallback();
+        if (!_isRunning) {
+          _isRunning = true;
+          final res = await restartCallback();
+          if (res.contains('Error') || res == "Failed") {
+            _isRunning = false;
+          }
+          return;
+        }
 
-        if (res != "Started") {
+        final status = await restartCallback();
+        if (status.contains('Error') || status == "Failed") {
           _isRunning = false;
           await restartCallback();
         }
-
-      } catch (_) {
+      } catch (e) {
+        print('⚠️ Supervisor error: $e');
         _isRunning = false;
         await restartCallback();
       }

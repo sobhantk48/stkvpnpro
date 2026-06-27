@@ -30,6 +30,7 @@ class CoreController {
       });
       return result.toString();
     } catch (e) {
+      print('❌ خطا در startCore: $e');
       return 'Error: $e';
     }
   }
@@ -39,6 +40,7 @@ class CoreController {
       final result = await _channel.invokeMethod('stopCore');
       return result.toString();
     } catch (e) {
+      print('❌ خطا در stopCore: $e');
       return 'Error: $e';
     }
   }
