@@ -26,16 +26,30 @@ class MainActivity : FlutterActivity() {
                 }
 
                 "startVpn" -> {
-                    val intent = Intent(this, CoreService::class.java)
-                    intent.putExtra("type", "singbox")
-                    intent.putExtra("config", "")
+
+                    val config =
+                        call.argument<String>("config") ?: ""
+
+                    val type =
+                        call.argument<String>("type") ?: "singbox"
+
+                    val intent =
+                        Intent(this, CoreService::class.java)
+
+                    intent.putExtra("type", type)
+                    intent.putExtra("config", config)
+
                     startService(intent)
+
                     result.success("started")
                 }
 
                 "stopVpn" -> {
-                    val intent = Intent(this, CoreService::class.java)
+                    val intent =
+                        Intent(this, CoreService::class.java)
+
                     stopService(intent)
+
                     result.success("stopped")
                 }
 
