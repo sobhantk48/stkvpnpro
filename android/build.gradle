@@ -12,13 +12,9 @@ buildscript {
     }
 }
 
-// جلوگیری از override شدن shrinkResources در همهٔ ماژول‌ها
-subprojects {
-    afterEvaluate { project ->
-        if (project.plugins.hasPlugin("com.android.application")) {
-            project.android.buildTypes.all { type ->
-                type.shrinkResources = false
-            }
-        }
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
     }
 }
