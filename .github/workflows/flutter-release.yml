@@ -12,37 +12,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 🟢 Flutter Setup
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.22.3"
+          flutter-version: "3.25.0"
           cache: true
 
-      # 🟢 Clean Gradle Cache (fix CI issues)
       - name: Clean Gradle Cache
         run: rm -rf ~/.gradle
 
-      # 🟢 Get dependencies
       - name: Pub Get
         run: flutter pub get
 
-      # 🟢 Build Release APK
       - name: Build APK
         run: flutter build apk --release
 
-      # 🟢 Verify output
       - name: Verify APK
         run: find build -name "*.apk"
 
-      # 🟢 Upload artifact (GitHub Actions download)
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
           path: build/app/outputs/flutter-apk/*.apk
 
-      # 🟢 Create GitHub Release (DIRECT DOWNLOAD APK)
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
