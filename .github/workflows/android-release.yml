@@ -30,18 +30,19 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build APK
-        run: flutter build apk --release
-
-      - name: Debug output
+      - name: Force APK build (STRICT)
         run: |
-          echo "=== LISTING OUTPUT ==="
-          find build -type f | grep apk || true
+          flutter clean
+          flutter build apk --release --verbose
 
-      - name: Upload APK (try both paths)
+      - name: Verify APK exists (FAIL if missing)
+        run: |
+          echo "Checking APK..."
+          ls -R build/app/outputs/ || exit 1
+          test -f build/app/outputs/flutter-apk/app-release.apk || exit 1
+
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/apk/release/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
