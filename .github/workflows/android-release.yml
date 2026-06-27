@@ -27,13 +27,16 @@ jobs:
         with:
           flutter-version: stable
 
-      - name: Get dependencies
+      - name: Install dependencies
         run: flutter pub get
 
-      - name: Build APK
+      - name: Build APK (Release)
         run: flutter build apk --release
 
-      - name: Upload artifact
+      - name: Verify APK exists
+        run: ls -R build/app/outputs/flutter-apk
+
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
