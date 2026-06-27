@@ -1,4 +1,4 @@
-name: Flutter Clean Production Build
+name: Flutter CI Stable
 
 on:
   push:
@@ -9,38 +9,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # 🚨 CRITICAL FIX: remove cached flutter installs
-      - name: Remove old cache
-        run: |
-          sudo rm -rf /opt/hostedtoolcache/flutter
-
-      - name: Setup Flutter CLEAN
+      - name: Setup Flutter (STABLE FIXED)
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.4'
+          flutter-version: 3.24.4
           channel: stable
-          cache: false   # 🔥 مهم‌ترین fix
 
-      - name: Verify Flutter
-        run: flutter doctor -v
+      - name: Clean
+        run: flutter clean
 
-      - name: Clean project
-        run: |
-          flutter clean
-          rm -rf android/.gradle
-          rm -rf ~/.gradle
-
-      - name: Pub Get
+      - name: Get Dependencies
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release --no-tree-shake-icons
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+        run: flutter build apk --release
