@@ -1,26 +1,41 @@
-name: v2ray_stk
-
-description: V2RAY STK - VPN Client
+name: stkvpnpro
+description: STK VPN Pro - کلاینت قدرتمند VPN با پشتیبانی sing-box
 publish_to: 'none'
-
-version: 1.0.36+1
+version: 1.0.37+2
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: ">=3.19.0"
 
 dependencies:
   flutter:
     sdk: flutter
-
-  shared_preferences: ^2.1.2
+  
+  # Core VPN
+  flutter_singbox_vpn: ^1.1.3          # پیشنهاد اصلی
+  permission_handler: ^11.3.1
+  shared_preferences: ^2.3.0
+  http: ^1.2.2
+  
+  # UI & UX
   flutter_local_notifications: ^17.2.4
-  http: ^1.2.1
+  provider: ^6.1.2                     # برای state management
+  qr_code_scanner: ^1.0.1
+  url_launcher: ^6.3.0
+  fluttertoast: ^8.2.8
+  
+  # Utils
+  connectivity_plus: ^6.0.3
+  package_info_plus: ^8.0.0
+  path_provider: ^2.1.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-  flutter_lints: ^2.0.0
+  flutter_lints: ^5.0.0
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
