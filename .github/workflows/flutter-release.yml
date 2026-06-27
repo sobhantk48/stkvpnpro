@@ -12,11 +12,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ✔ FIX: فقط flutter-version (بدون channel)
+      # 🚀 FIX: Flutter must match Dart >= 3.7
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.22.3"
+          flutter-version: "3.24.0"
           cache: true
 
       - name: Clean Gradle Cache
