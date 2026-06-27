@@ -1,0 +1,6 @@
+enum NotificationState {
+
+  hidden,
+
+  visible,
+}
