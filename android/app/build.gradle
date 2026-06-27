@@ -41,6 +41,7 @@ android {
         release {
             signingConfig = signingConfigs.debug
             minifyEnabled = false
+            shrinkResources = false   // این خط اضافه شد
         }
     }
 }
