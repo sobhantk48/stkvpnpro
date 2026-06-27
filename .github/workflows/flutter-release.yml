@@ -15,19 +15,23 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: stable
+          flutter-version: "3.22.0"
+          cache: true
+
+      - name: Flutter Doctor
+        run: flutter doctor -v
 
       - name: Pub Get
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release --verbose
+        run: flutter build apk --release
 
-      - name: Find APK (debug)
-        run: find . -name "*.apk"
+      - name: List APK Output
+        run: ls -R build/app/outputs/flutter-apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: "**/*.apk"
+          path: build/app/outputs/flutter-apk/*.apk
