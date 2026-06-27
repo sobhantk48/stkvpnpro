@@ -1,17 +1,13 @@
 class TrafficModel {
 
-  final int upload;
+  int upload;
 
-  final int download;
+  int download;
 
-  final int total;
+  TrafficModel({
 
-  const TrafficModel({
+    this.upload = 0,
 
-    required this.upload,
-
-    required this.download,
-
-    required this.total,
+    this.download = 0,
   });
 }

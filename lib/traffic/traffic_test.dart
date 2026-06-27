@@ -1,19 +1,18 @@
-import 'traffic_counter.dart';
-import 'traffic_monitor.dart';
+import 'traffic_engine.dart';
 
 class TrafficTest {
 
-  static String run() {
+  static bool run() {
 
-    TrafficCounter
-        .addUpload(
-            1000);
+    TrafficEngine
+        .addUpload(10);
 
-    TrafficCounter
-        .addDownload(
-            2000);
+    TrafficEngine
+        .addDownload(20);
 
-    return TrafficMonitor
-        .summary();
+    return
+
+        TrafficEngine.upload() == 10 &&
+        TrafficEngine.download() == 20;
   }
 }
