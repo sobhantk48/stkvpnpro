@@ -33,11 +33,15 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
 
-      - name: Debug output files
-        run: ls -R build/app/outputs/
+      - name: Debug output
+        run: |
+          echo "=== LISTING OUTPUT ==="
+          find build -type f | grep apk || true
 
-      - name: Upload APK artifact
+      - name: Upload APK (try both paths)
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/apk/release/app-release.apk
