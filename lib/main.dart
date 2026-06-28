@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'core/core_supervisor.dart';
 import 'ui/dashboard.dart';
-import 'providers/vpn_provider.dart';   // بعداً می‌سازیم
+import 'providers/vpn_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +18,13 @@ void main() async {
 }
 
 Future<void> _initializeServices() async {
-  // TODO: Initialize notifications, preferences, etc.
+  try {
+    // Initialize CoreSupervisor
+    final supervisor = CoreSupervisor();
+    await supervisor.initialize();
+  } catch (e) {
+    print('❌ خطا در راه‌اندازی سرویس‌ها: $e');
+  }
 }
 
 class STKVPNApp extends StatelessWidget {
