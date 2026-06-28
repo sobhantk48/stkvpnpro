@@ -19,11 +19,20 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Flutter doctor
+        run: flutter doctor -v
+
       - name: Clean
         run: flutter clean
 
       - name: Get dependencies
         run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test --no-pub
 
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
