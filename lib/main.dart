@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'core/core_supervisor.dart';
+import 'provider/vpn_provider.dart';
 import 'ui/dashboard.dart';
-import 'providers/vpn_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Lock orientation to portrait
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   
   runApp(const STKVPNApp());
