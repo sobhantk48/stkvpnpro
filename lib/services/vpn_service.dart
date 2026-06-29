@@ -1,71 +1,93 @@
-import 'package:v2ray_stk/services/notification_service.dart';
+import 'package:flutter/foundation.dart';
+import 'notification_service.dart';
+
+enum VPNStatus { disconnected, connecting, connected, disconnecting, error }
 
 class VpnService {
   static final VpnService _instance = VpnService._internal();
   factory VpnService() => _instance;
   VpnService._internal();
 
-  final V2RayPlus _v2ray = V2RayPlus();
-  bool _isConnected = false;
   final NotificationService _notif = NotificationService();
+  VPNStatus _status = VPNStatus.disconnected;
 
-  bool get isConnected => _isConnected;
+  VPNStatus get status => _status;
 
   Future<void> initialize() async {
-    await _notif.init();
-    // تنظیمات اولیه V2RayPlus
-    await _v2ray.initialize();
-    print('✅ V2RayPlus و نوتیفیکیشن مقداردهی اولیه شدند');
+    try {
+      await _notif.init();
+      debugPrint('✅ VpnService و Notification مقداردهی شد');
+    } catch (e) {
+      debugPrint('❌ خطا در initialize: $e');
+      rethrow;
+    }
   }
 
-  Future<void> startVpn(String config) async {
+  Future<bool> startVpn(String configJson) async {
     try {
-      await _v2ray.startV2Ray(
-        remark: 'V2RAY stk',
-        config: config,
-        useSystemProxy: false,
-      );
-      _isConnected = true;
+      _status = VPNStatus.connecting;
+      
+      // اتصال به sing-box
+      // TODO: اضافه کردن native implementation
+      
+      _status = VPNStatus.connected;
       await _notif.showPersistentNotification(
         '✅ VPN وصل شد',
-        'در حال حفاظت از اتصال شما',
+        'اتصال برقرار است',
       );
-      print('✅ V2RayPlus متصل شد');
+      debugPrint('✅ VPN متصل شد');
+      return true;
     } catch (e) {
-      print('❌ خطا در اتصال V2RayPlus: $e');
-      _isConnected = false;
+      _status = VPNStatus.error;
+      await _notif.showNotification(
+        '❌ خطا',
+        'خطا در اتصال VPN: $e',
+      );
+      debugPrint('❌ خطا در اتصال: $e');
       rethrow;
     }
   }
 
-  Future<void> stopVpn() async {
+  Future<bool> stopVpn() async {
     try {
-      await _v2ray.stopV2Ray();
-      _isConnected = false;
+      _status = VPNStatus.disconnecting;
+      
+      // قطع کردن sing-box
+      // TODO: اضافه کردن native implementation
+      
+      _status = VPNStatus.disconnected;
       await _notif.cancelAll();
       await _notif.showNotification(
-        '❌ VPN قطع شد',
-        'اتصال VPN قطع گردید',
+        '✅ VPN قطع شد',
+        'اتصال خاتمه یافت',
       );
-      print('❌ V2RayPlus قطع شد');
+      debugPrint('✅ VPN قطع شد');
+      return true;
     } catch (e) {
-      print('❌ خطا در قطع V2RayPlus: $e');
+      _status = VPNStatus.error;
+      debugPrint('❌ خطا در قطع: $e');
       rethrow;
     }
   }
 
-  Future<void> toggleVpn(String config) async {
-    if (_isConnected) {
-      await stopVpn();
+  Future<bool> toggleVpn(String configJson) async {
+    if (_status == VPNStatus.connected) {
+      return !(await stopVpn());
     } else {
-      await startVpn(config);
+      return await startVpn(configJson);
     }
   }
 
-  Future<String?> getStatus() async {
+  Future<Map<String, dynamic>?> getTraffic() async {
     try {
-      return await _v2ray.getStatus();
+      // TODO: دریافت ترافیک از native
+      return {
+        'upload': 0.0,
+        'download': 0.0,
+        'ping': 0,
+      };
     } catch (e) {
+      debugPrint('❌ خطا در دریافت ترافیک: $e');
       return null;
     }
   }
