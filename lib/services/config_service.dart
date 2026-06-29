@@ -1,101 +1,69 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import '../config/vpn_config.dart';
 
 class ConfigService {
-  static const String _keyProfiles = 'vpn_profiles';
-  static const String _keyActiveProfile = 'active_profile';
+  static const String _keyConfigs = 'vpn_configs';
+  static const String _keyActiveConfig = 'active_config';
 
-  static Future<List<VPNProfile>> loadProfiles() async {
+  /// بارگذاری تمام پروفایل‌ها
+  static Future<List<VpnConfig>> loadConfigs() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final json = prefs.getString(_keyProfiles);
+      final json = prefs.getString(_keyConfigs);
       if (json == null) return [];
       
       final List<dynamic> decoded = jsonDecode(json);
       return decoded
-          .map((e) => VPNProfile.fromJson(Map<String, dynamic>.from(e)))
+          .map((e) => VpnConfig.fromJson(Map<String, dynamic>.from(e)))
           .toList();
     } catch (e) {
-      debugPrint('❌ خطا در بارگذاری پروفایل‌ها: $e');
+      debugPrint('❌ خطا در بارگذاری کانفیگ‌ها: $e');
       return [];
     }
   }
 
-  static Future<void> saveProfiles(List<VPNProfile> profiles) async {
+  /// ذخیره تمام پروفایل‌ها
+  static Future<void> saveConfigs(List<VpnConfig> configs) async {
     try {
+      if (configs.length > 10) {
+        throw Exception('حداکثر 10 پروفایل مجاز است');
+      }
+      
       final prefs = await SharedPreferences.getInstance();
-      final json = jsonEncode(profiles.map((p) => p.toJson()).toList());
-      await prefs.setString(_keyProfiles, json);
-      debugPrint('✅ پروفایل‌ها ذخیره شدند');
+      final json = jsonEncode(configs.map((c) => c.toJson()).toList());
+      await prefs.setString(_keyConfigs, json);
+      debugPrint('✅ ${configs.length} پروفایل ذخیره شد');
     } catch (e) {
-      debugPrint('❌ خطا در ذخیره پروفایل‌ها: $e');
+      debugPrint('❌ خطا در ذخیره: $e');
       rethrow;
     }
   }
 
-  static Future<String?> loadActiveProfile() async {
+  /// بارگذاری پروفایل فعال
+  static Future<String?> loadActiveConfig() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      return prefs.getString(_keyActiveProfile);
+      return prefs.getString(_keyActiveConfig);
     } catch (e) {
-      debugPrint('❌ خطا در بارگذاری پروفایل فعال: $e');
+      debugPrint('❌ خطا: $e');
       return null;
     }
   }
 
-  static Future<void> saveActiveProfile(String? profileId) async {
+  /// ذخیره پروفایل فعال
+  static Future<void> saveActiveConfig(String? configId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      if (profileId == null) {
-        await prefs.remove(_keyActiveProfile);
+      if (configId == null) {
+        await prefs.remove(_keyActiveConfig);
       } else {
-        await prefs.setString(_keyActiveProfile, profileId);
+        await prefs.setString(_keyActiveConfig, configId);
       }
-      debugPrint('✅ پروفایل فعال ذخیره شد');
     } catch (e) {
-      debugPrint('❌ خطا در ذخیره پروفایل فعال: $e');
+      debugPrint('❌ خطا: $e');
       rethrow;
     }
-  }
-}
-
-class VPNProfile {
-  final String id;
-  final String name;
-  final String protocol;
-  final String server;
-  final String configJson;
-  final DateTime createdAt;
-
-  VPNProfile({
-    required this.id,
-    required this.name,
-    required this.protocol,
-    required this.server,
-    required this.configJson,
-    DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'protocol': protocol,
-    'server': server,
-    'config': configJson,
-    'createdAt': createdAt.toIso8601String(),
-  };
-
-  factory VPNProfile.fromJson(Map<String, dynamic> json) {
-    return VPNProfile(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      protocol: json['protocol'] ?? 'VLESS',
-      server: json['server'] ?? '',
-      configJson: json['config'] ?? '',
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
-          : null,
-    );
   }
 }
