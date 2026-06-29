@@ -1,11 +1,11 @@
-/// وضعیت یکپارچه VPN
+/// وضعیت VPN
 enum VpnStatus {
-  disconnected,      // قطع شده
-  connecting,        // در حال اتصال
-  connected,         // متصل
-  reconnecting,      // بازاتصال
-  disconnecting,     // در حال قطع
-  error,            // خطا
+  disconnected,
+  connecting,
+  connected,
+  reconnecting,
+  disconnecting,
+  error,
 }
 
 extension VpnStatusExtension on VpnStatus {
@@ -25,4 +25,8 @@ extension VpnStatusExtension on VpnStatus {
         return 'خطا';
     }
   }
+
+  bool get isActive => 
+      this == VpnStatus.connected || 
+      this == VpnStatus.connecting;
 }
