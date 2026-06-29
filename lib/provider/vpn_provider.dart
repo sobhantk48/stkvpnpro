@@ -1,147 +1,151 @@
 import 'package:flutter/material.dart';
 import '../services/vpn_service.dart';
 import '../services/config_service.dart';
+import '../config/vpn_config.dart';
+import '../core/models/vpn_status.dart';
 import '../core/core_supervisor.dart';
 
 class VPNProvider extends ChangeNotifier {
   final VpnService _vpnService = VpnService();
-  final ConfigService _configService = ConfigService();
+  final CoreSupervisor _supervisor = CoreSupervisor();
   
-  VPNStatus _status = VPNStatus.disconnected;
-  String? _selectedProfileId;
-  List<VPNProfile> _profiles = [];
+  VpnStatus _status = VpnStatus.disconnected;
+  String? _selectedConfigId;
+  List<VpnConfig> _configs = [];
   String? _errorMessage;
-  Map<String, dynamic> _trafficData = {};
 
   // Getters
-  VPNStatus get status => _status;
-  bool get isConnected => _status == VPNStatus.connected;
-  String? get selectedProfileId => _selectedProfileId;
-  List<VPNProfile> get profiles => _profiles;
+  VpnStatus get status => _status;
+  bool get isConnected => _status == VpnStatus.connected;
+  String? get selectedConfigId => _selectedConfigId;
+  List<VpnConfig> get configs => _configs;
   String? get errorMessage => _errorMessage;
-  Map<String, dynamic> get trafficData => _trafficData;
-  String? get currentProtocol => _profiles
-      .cast<VPNProfile?>()
-      .firstWhere((p) => p?.id == _selectedProfileId, orElse: () => null)
-      ?.protocol;
-  String? get currentServer => _profiles
-      .cast<VPNProfile?>()
-      .firstWhere((p) => p?.id == _selectedProfileId, orElse: () => null)
-      ?.server;
+
+  String? get currentProtocol {
+    if (_selectedConfigId == null) return null;
+    try {
+      return _configs.firstWhere((c) => c.id == _selectedConfigId).protocol;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String? get currentServer {
+    if (_selectedConfigId == null) return null;
+    try {
+      // استخراج server از rawConfig
+      return 'Server';  // TODO: Parse from config
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Map<String, dynamic> get trafficData => _supervisor.trafficNotifier.value;
 
   VPNProvider() {
     _initializeListeners();
   }
 
   void _initializeListeners() {
-    final supervisor = CoreSupervisor();
-    supervisor.statusNotifier.addListener(() {
-      _status = supervisor.statusNotifier.value;
+    _supervisor.statusNotifier.addListener(() {
+      _status = _supervisor.statusNotifier.value;
       notifyListeners();
     });
     
-    supervisor.trafficNotifier.addListener(() {
-      _trafficData = supervisor.trafficNotifier.value;
+    _supervisor.trafficNotifier.addListener(() {
       notifyListeners();
     });
   }
 
   Future<void> initialize() async {
     try {
+      await _supervisor.initialize();
       await _vpnService.initialize();
-      await loadProfiles();
+      await loadConfigs();
     } catch (e) {
-      _errorMessage = 'خطا در مقداردهی: $e';
+      _errorMessage = 'خطا: $e';
       notifyListeners();
     }
   }
 
-  /// اتصال به VPN با پروفایل
-  Future<void> connect(String profileId) async {
+  /// اتصال
+  Future<void> connect(String configId) async {
     try {
       _errorMessage = null;
-      _selectedProfileId = profileId;
+      _selectedConfigId = configId;
       notifyListeners();
 
-      final profile = _profiles.firstWhere((p) => p.id == profileId);
-      final configJson = profile.configJson;
+      final config = _configs.firstWhere((c) => c.id == configId);
+      await _vpnService.startVpn(config.rawConfig);
+      await ConfigService.saveActiveConfig(configId);
       
-      await _vpnService.startVpn(configJson);
-      await _configService.saveActiveProfile(profileId);
-      
-      _status = VPNStatus.connected;
-      debugPrint('✅ اتصال به $profileId موفق');
+      _status = VpnStatus.connected;
+      debugPrint('✅ اتصال به ${config.name}');
       
     } catch (e) {
-      _status = VPNStatus.error;
+      _status = VpnStatus.error;
       _errorMessage = 'خطا: $e';
-      debugPrint('❌ خطا در اتصال: $e');
+      debugPrint('❌ $e');
     }
     notifyListeners();
   }
 
-  /// قطع اتصال
+  /// قطع
   Future<void> disconnect() async {
     try {
       _errorMessage = null;
       await _vpnService.stopVpn();
-      await _configService.saveActiveProfile(null);
-      _status = VPNStatus.disconnected;
-      _selectedProfileId = null;
-      debugPrint('✅ اتصال قطع شد');
+      await ConfigService.saveActiveConfig(null);
+      _status = VpnStatus.disconnected;
+      _selectedConfigId = null;
     } catch (e) {
-      _status = VPNStatus.error;
-      _errorMessage = 'خطا در قطع: $e';
-      debugPrint('❌ خطا در قطع: $e');
+      _status = VpnStatus.error;
+      _errorMessage = 'خطا: $e';
     }
     notifyListeners();
   }
 
-  /// بارگذاری پروفایل‌ها
-  Future<void> loadProfiles() async {
+  /// بارگذاری
+  Future<void> loadConfigs() async {
     try {
       _errorMessage = null;
-      _profiles = await _configService.loadProfiles();
-      
-      final activeId = await _configService.loadActiveProfile();
-      _selectedProfileId = activeId;
-      
-      debugPrint('✅ ${_profiles.length} پروفایل بارگذاری شد');
+      _configs = await ConfigService.loadConfigs();
+      _selectedConfigId = await ConfigService.loadActiveConfig();
+      debugPrint('✅ ${_configs.length} کانفیگ بارگذاری شد');
       notifyListeners();
-    } catch (e) {
-      _errorMessage = 'خطا در بارگذاری پروفایل‌ها: $e';
-      debugPrint('❌ $_errorMessage');
-      notifyListeners();
-    }
-  }
-
-  /// اضافه کردن پروفایل
-  Future<void> addProfile(VPNProfile profile) async {
-    try {
-      _errorMessage = null;
-      _profiles.add(profile);
-      await _configService.saveProfiles(_profiles);
-      notifyListeners();
-      debugPrint('✅ پروفایل ${profile.name} اضافه شد');
     } catch (e) {
       _errorMessage = 'خطا: $e';
       notifyListeners();
     }
   }
 
-  /// حذف پروفایل
-  Future<void> deleteProfile(String profileId) async {
+  /// اضافه کردن
+  Future<void> addConfig(VpnConfig config) async {
     try {
       _errorMessage = null;
-      _profiles.removeWhere((p) => p.id == profileId);
+      _configs.add(config);
+      await ConfigService.saveConfigs(_configs);
+      notifyListeners();
+      debugPrint('✅ ${config.name} اضافه شد');
+    } catch (e) {
+      _errorMessage = 'خطا: $e';
+      notifyListeners();
+    }
+  }
+
+  /// حذف
+  Future<void> deleteConfig(String configId) async {
+    try {
+      _errorMessage = null;
+      _configs.removeWhere((c) => c.id == configId);
       
-      if (_selectedProfileId == profileId) {
+      if (_selectedConfigId == configId) {
         await disconnect();
       }
       
-      await _configService.saveProfiles(_profiles);
+      await ConfigService.saveConfigs(_configs);
       notifyListeners();
-      debugPrint('✅ پروفایل حذف شد');
+      debugPrint('✅ حذف شد');
     } catch (e) {
       _errorMessage = 'خطا: $e';
       notifyListeners();
@@ -150,6 +154,7 @@ class VPNProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _supervisor.dispose();
     super.dispose();
   }
 }
