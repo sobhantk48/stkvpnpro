@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/core_supervisor.dart';
-import '../providers/vpn_provider.dart';
+import '../core/models/vpn_status.dart';
+import '../provider/vpn_provider.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -29,44 +30,27 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
     try {
       await supervisor.initialize();
       await vpnProvider.initialize();
-      _setupHealthMonitoring();
-      _restoreLastProfile();
+      _setupMonitoring();
     } catch (e) {
-      if (mounted) {
-        _showError('خطا در مقداردهی: $e');
-      }
+      _showError('خطا: $e');
     }
   }
 
-  void _setupHealthMonitoring() {
+  void _setupMonitoring() {
     supervisor.startHealthMonitoring(
-      checkInterval: const Duration(seconds: 5),
       statusCheck: () async => vpnProvider.status,
-      onError: (error) async {
-        if (mounted) {
-          _showError('خطا در نظارت: $error');
-        }
-      },
+      onError: (e) async => _showError(e),
     );
 
     supervisor.startTrafficMonitoring(
-      updateInterval: const Duration(seconds: 1),
       trafficFetcher: () async => vpnProvider.trafficData,
     );
   }
 
-  Future<void> _restoreLastProfile() async {
-    if (vpnProvider.selectedProfileId != null) {
-      await vpnProvider.connect(vpnProvider.selectedProfileId!);
-    }
-  }
-
-  void _showError(String message) {
+  void _showError(String msg) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(msg), backgroundColor: Colors.red),
     );
   }
 
@@ -75,7 +59,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
     if (state == AppLifecycleState.paused) {
       supervisor.stopHealthMonitoring();
     } else if (state == AppLifecycleState.resumed) {
-      _setupHealthMonitoring();
+      _setupMonitoring();
     }
   }
 
@@ -92,55 +76,38 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
       appBar: AppBar(
         title: const Text('STK VPN Pro'),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // TODO: Settings
-            },
-          ),
-        ],
       ),
       body: Consumer<VPNProvider>(
         builder: (context, provider, _) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                // کارت وضعیت
+                // وضعیت
                 Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
                   child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: ValueListenableBuilder<VPNStatus>(
+                    padding: const EdgeInsets.all(24),
+                    child: ValueListenableBuilder<VpnStatus>(
                       valueListenable: supervisor.statusNotifier,
                       builder: (context, status, _) {
-                        final isConnected = status == VPNStatus.connected;
                         return Column(
                           children: [
                             Icon(
-                              isConnected ? Icons.shield : Icons.shield_outlined,
+                              status == VpnStatus.connected 
+                                  ? Icons.shield 
+                                  : Icons.shield_outlined,
                               size: 80,
-                              color: isConnected ? Colors.green : Colors.grey,
+                              color: status == VpnStatus.connected 
+                                  ? Colors.green 
+                                  : Colors.grey,
                             ),
                             const SizedBox(height: 16),
-                            ValueListenableBuilder<String>(
-                              valueListenable: supervisor.statusTextNotifier,
-                              builder: (context, statusText, _) {
-                                return Text(
-                                  statusText,
-                                  style: Theme.of(context).textTheme.headlineSmall,
-                                );
-                              },
+                            Text(
+                              status.displayName,
+                              style: Theme.of(context).textTheme.headlineSmall,
                             ),
-                            const SizedBox(height: 8),
                             if (provider.currentProtocol != null)
                               Text('پروتکل: ${provider.currentProtocol}'),
-                            if (provider.currentServer != null)
-                              Text('سرور: ${provider.currentServer}'),
                           ],
                         );
                       },
@@ -150,31 +117,22 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
 
                 const SizedBox(height: 24),
 
-                // آمار ترافیک
+                // ترافیک
                 ValueListenableBuilder<Map<String, dynamic>>(
                   valueListenable: supervisor.trafficNotifier,
                   builder: (context, traffic, _) {
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildStatCard(
-                          'دانلود',
-                          '${(traffic['download'] as num?)?.toStringAsFixed(2) ?? '0'} KB/s',
-                          Icons.download,
-                          Colors.blue,
-                        ),
-                        _buildStatCard(
-                          'آپلود',
-                          '${(traffic['upload'] as num?)?.toStringAsFixed(2) ?? '0'} KB/s',
-                          Icons.upload,
-                          Colors.orange,
-                        ),
-                        _buildStatCard(
-                          'پینگ',
+                        _buildStat('دانلود', 
+                          '${(traffic['download'] as num?)?.toStringAsFixed(2) ?? "0"} KB/s',
+                          Icons.download, Colors.blue),
+                        _buildStat('آپلود',
+                          '${(traffic['upload'] as num?)?.toStringAsFixed(2) ?? "0"} KB/s',
+                          Icons.upload, Colors.orange),
+                        _buildStat('پینگ',
                           '${traffic['ping'] ?? 0} ms',
-                          Icons.timer,
-                          Colors.purple,
-                        ),
+                          Icons.timer, Colors.purple),
                       ],
                     );
                   },
@@ -182,34 +140,32 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
 
                 const SizedBox(height: 24),
 
-                // دکمه‌های اتصال
+                // دکمه‌ها
                 Row(
                   children: [
                     Expanded(
                       child: ElevatedButton.icon(
-                        onPressed: provider.selectedProfileId != null &&
-                                provider.status != VPNStatus.connecting
-                            ? () => provider.connect(provider.selectedProfileId!)
+                        onPressed: provider.selectedConfigId != null &&
+                                provider.status != VpnStatus.connecting
+                            ? () => provider.connect(provider.selectedConfigId!)
                             : null,
                         icon: const Icon(Icons.power_settings_new),
                         label: const Text('اتصال'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton.icon(
-                        onPressed: provider.status == VPNStatus.connected
+                        onPressed: provider.status == VpnStatus.connected
                             ? () => provider.disconnect()
                             : null,
                         icon: const Icon(Icons.power_settings_new_outlined),
                         label: const Text('قطع'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                       ),
                     ),
@@ -218,25 +174,25 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
 
                 const SizedBox(height: 24),
 
-                // لیست پروفایل‌ها
-                if (provider.profiles.isNotEmpty)
+                // لیست
+                if (provider.configs.isNotEmpty)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('پروفایل‌های دردسترس:'),
+                      const Text('پروفایل‌ها:'),
                       const SizedBox(height: 12),
-                      ...provider.profiles.map((profile) {
-                        final isSelected = profile.id == provider.selectedProfileId;
+                      ...provider.configs.map((config) {
                         return Card(
-                          color: isSelected ? Colors.blue.shade100 : null,
+                          color: config.id == provider.selectedConfigId
+                              ? Colors.blue.shade100
+                              : null,
                           child: ListTile(
-                            leading: const Icon(Icons.public),
-                            title: Text(profile.name),
-                            subtitle: Text(profile.protocol),
-                            onTap: () => provider.connect(profile.id),
+                            title: Text(config.name),
+                            subtitle: Text(config.protocol),
+                            onTap: () => provider.connect(config.id),
                             trailing: IconButton(
                               icon: const Icon(Icons.delete),
-                              onPressed: () => provider.deleteProfile(profile.id),
+                              onPressed: () => provider.deleteConfig(config.id),
                             ),
                           ),
                         );
@@ -244,16 +200,12 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                     ],
                   ),
 
-                // نمایش خطا
                 if (provider.errorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 16),
                     child: Container(
                       padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                      color: Colors.red.shade100,
                       child: Text(
                         provider.errorMessage!,
                         style: TextStyle(color: Colors.red.shade900),
@@ -268,17 +220,16 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+  Widget _buildStat(String label, String value, IconData icon, Color color) {
     return Expanded(
       child: Card(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          padding: const EdgeInsets.all(12),
           child: Column(
             children: [
-              Icon(icon, color: color, size: 32),
-              const SizedBox(height: 8),
-              Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+              Icon(icon, color: color),
               const SizedBox(height: 4),
+              Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
               Text(label, style: const TextStyle(fontSize: 12)),
             ],
           ),
