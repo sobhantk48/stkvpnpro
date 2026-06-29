@@ -11,20 +11,7 @@ void main() async {
   // Lock orientation to portrait
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   
-  // Initialize notifications & permissions
-  await _initializeServices();
-  
   runApp(const STKVPNApp());
-}
-
-Future<void> _initializeServices() async {
-  try {
-    // Initialize CoreSupervisor
-    final supervisor = CoreSupervisor();
-    await supervisor.initialize();
-  } catch (e) {
-    print('❌ خطا در راه‌اندازی سرویس‌ها: $e');
-  }
 }
 
 class STKVPNApp extends StatelessWidget {
